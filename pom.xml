@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>LesBonsServices</artifactId>
+	<artifactId>lesbonsservices</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>LesBonsServices</name>
 	<description>This project is a web application that connects individuals with local professionals and allows easy appointment booking through a simple and intuitive interface.</description>
