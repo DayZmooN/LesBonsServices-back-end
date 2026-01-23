@@ -1,23 +1,51 @@
 package com.example.lesbonsservices.model;
 
-import ch.qos.logback.core.status.Status;
+import com.example.lesbonsservices.model.enums.StatusEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "tplanning")
+@Table(name = "planning")
+@EntityListeners(AuditingEntityListener.class)
 public class Planning {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDateTime startTime;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusEnum status;
 
-    @Column(nullable = false)
-    private LocalDateTime endTime;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false,updatable = false)
+    private LocalDateTime created ;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private  LocalDateTime updated;
+    /***
+     *  Relations
+     */
+
+    @OneToOne(fetch =  FetchType.LAZY,optional = false)
+    @JoinColumn(name = "professional_id", nullable = false,unique = true)
+    private Professional professional;
+
+    @OneToMany(mappedBy = "planning",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Disponibility> disponibilityList;
 
 
-    private Status status;
 }
