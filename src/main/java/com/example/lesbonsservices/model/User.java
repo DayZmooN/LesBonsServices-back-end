@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -51,9 +52,8 @@ public class User {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true)
     private Professional professional;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="customer_id", nullable=false)
-    private Appointment appointment;
+    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Appointment> appointment;
 
 
 
