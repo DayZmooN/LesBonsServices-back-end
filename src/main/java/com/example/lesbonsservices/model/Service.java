@@ -1,19 +1,18 @@
 package com.example.lesbonsservices.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "services")
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Service {
@@ -51,6 +50,6 @@ public class Service {
     private Category category;
 
 
-    @OneToMany(mappedBy = "Service")
-    private Appointment appointment;
+    @OneToMany(mappedBy = "service")
+    private List<Appointment> appointment;
 }

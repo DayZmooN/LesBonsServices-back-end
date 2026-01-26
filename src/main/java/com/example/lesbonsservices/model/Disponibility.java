@@ -2,16 +2,15 @@ package com.example.lesbonsservices.model;
 
 import com.example.lesbonsservices.model.enums.StatusEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@Data
 @NoArgsConstructor
 @Entity
 @Table(name = "disponibilities")
