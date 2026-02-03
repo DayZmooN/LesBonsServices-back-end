@@ -11,8 +11,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class RegistrationUserServiceTest {
@@ -97,4 +102,42 @@ public class RegistrationUserServiceTest {
         assertThat(savedUser.getPassword()).isEqualTo("ENCODED_PASSWORD");
     }
 
+    @Test
+    public void should_throw_exception_when_email_already_exists() {
+        // ===== Arrange =====
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("john@gmail.com");
+        user.setPassword("john12345");
+        user.setFirstName("john");
+        user.setLastName("do");
+        user.setPhone("0606060606");
+        user.setRole(RoleEnum.CLIENT);
+
+        UserRegistrationRequestDto userRequestDto = new UserRegistrationRequestDto(
+                user.getEmail(), user.getPassword(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone(),
+                user.getRole()
+        );
+
+        // Simule le comportement du repository pour renvoyer true (email existe) a la methode existsByEmail()
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
+
+        // ===== Act & Assert =====
+        ResponseStatusException thrown = assertThrows(ResponseStatusException.class, () -> {
+            registrationUserService.registrationUser(userRequestDto);
+        });
+        System.out.println(thrown.getMessage());
+
+        // Vérification du message d'exception
+        assertEquals("Email existe déja", thrown.getReason());
+        assertEquals(HttpStatus.CONFLICT,thrown.getStatusCode());
+
+        // Vérification des interactions avec le repository
+        verify(userRepository).existsByEmail("john@gmail.com");
+        verify(userRepository,never()).save(any());
+        verify(passwordEncoder,never()).encode(any());
+    }
 }
