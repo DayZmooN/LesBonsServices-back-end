@@ -1,6 +1,6 @@
 package com.example.lesbonsservices.service;
 
-import com.example.lesbonsservices.dto.UserRegisterResponseDto;
+import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.model.User;
 import com.example.lesbonsservices.model.enums.RoleEnum;
@@ -75,7 +75,7 @@ public class RegistrationUserServiceTest {
         );
 
         // Appel du service d'inscription
-        UserRegisterResponseDto responseDto = registrationUserService.registrationUser(userRequestDto);
+        UserRegistrationResponseDto responseDto = registrationUserService.registrationUser(userRequestDto);
 
         // ===== Assert =====
         // Vérification des données retournées après l'inscription

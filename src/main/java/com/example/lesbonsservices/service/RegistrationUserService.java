@@ -1,6 +1,6 @@
 package com.example.lesbonsservices.service;
 
-import com.example.lesbonsservices.dto.UserRegisterResponseDto;
+import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.model.User;
 import com.example.lesbonsservices.model.enums.RoleEnum;
@@ -30,7 +30,7 @@ public class RegistrationUserService {
      * @return UserRegisterResponseDto contenant les informations de l'utilisateur créé (sans mot de passe)
      * @throws ResponseStatusException si l'email est déjà utilisé (HTTP 409)
      */
-    public UserRegisterResponseDto registrationUser(UserRegistrationRequestDto dto) {
+    public UserRegistrationResponseDto registrationUser(UserRegistrationRequestDto dto) {
         //  Vérifie si l'email existe
         //  Verify if email already exist
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -52,7 +52,7 @@ public class RegistrationUserService {
 
         //  Conversion en DTO pour la réponse (sans mot de passe)
         //  Conversion to DTO for the response (without password)        return new UserRegisterResponseDto(
-        return new UserRegisterResponseDto(
+        return new UserRegistrationResponseDto(
                 savedUser.getId(),
                 savedUser.getEmail(),
                 savedUser.getFirstName(),

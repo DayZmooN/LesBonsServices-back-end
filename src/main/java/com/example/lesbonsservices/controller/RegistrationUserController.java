@@ -1,6 +1,6 @@
 package com.example.lesbonsservices.controller;
 
-import com.example.lesbonsservices.dto.UserRegisterResponseDto;
+import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.service.RegistrationUserService;
 import jakarta.validation.Valid;
@@ -42,10 +42,10 @@ public class RegistrationUserController {
      *         ou HTTP 409 CONFLICT si l'email existe déjà (géré dans le service)
      */
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponseDto> createUser(@Valid @RequestBody UserRegistrationRequestDto dto) {
+    public ResponseEntity<UserRegistrationResponseDto> createUser(@Valid @RequestBody UserRegistrationRequestDto dto) {
         //  Appel du service pour créer l'utilisateur
         //  Call to the service to create the user
-        UserRegisterResponseDto responseDto = registrationUserService.registrationUser(dto);
+        UserRegistrationResponseDto responseDto = registrationUserService.registrationUser(dto);
 
         //  Retourne HTTP 201 Created + le DTO dans le body
         //  Returns HTTP 201 Created + the DTO in the body
