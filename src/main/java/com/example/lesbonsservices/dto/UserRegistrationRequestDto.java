@@ -32,7 +32,6 @@ public class UserRegistrationRequestDto {
     private String lastName;
 
 
-    @NotBlank
     @NotEmpty(message = "Téléphone : uniquement des chiffres (15).")
     @Column(length = 30)
     private String phone;
