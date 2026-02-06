@@ -2,10 +2,10 @@ package com.example.lesbonsservices.service;
 
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
+import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.User;
 import com.example.lesbonsservices.model.enums.RoleEnum;
 import com.example.lesbonsservices.repository.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,7 +34,7 @@ public class RegistrationUserService {
         //  Vérifie si l'email existe
         //  Verify if email already exist
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"Email existe déja");
+            throw new EmailAlreadyUsedException("Email: "+dto.getEmail()+" existe déja");
         }
         //  Création de objet User et encodage du mot de passe
         //  create object User and encode password
