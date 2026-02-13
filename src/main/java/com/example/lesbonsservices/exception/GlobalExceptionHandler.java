@@ -175,4 +175,41 @@ public class GlobalExceptionHandler {
     }
 
 
+    /**
+     * Safety net: handles any unexpected exception not covered by more specific handlers.
+     *
+     * This ensures the API always returns a consistent {@link ApiError} response,
+     * even when an unhandled runtime exception occurs (NullPointerException,
+     * IllegalStateException, etc.).
+     *
+     * The client receives a generic message while the full stacktrace is logged
+     * on the server for debugging purposes.
+     *
+     * Logging level: ERROR, since this indicates a server-side failure.
+     *
+     * @param ex      the unexpected exception
+     * @param request the current HTTP request
+     * @return a standardized 500 ApiError response
+     */
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "Unexpected error",
+                request.getRequestURI(),
+                java.util.UUID.randomUUID().toString(),
+                null
+        );
+
+        logger.error("[{}] Unhandled error on {}",
+                apiError.requestId(), apiError.path(), ex);
+
+        return ResponseEntity.status(status).body(apiError);
+    }
+
 }
