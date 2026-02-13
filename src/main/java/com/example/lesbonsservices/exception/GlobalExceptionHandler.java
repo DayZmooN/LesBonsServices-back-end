@@ -60,4 +60,52 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
     }
 
+
+
+    /**
+     * Handles validation errors triggered by DTOs annotated with {@code @Valid}.
+     *
+     * Example cases: missing fields, invalid formats, failed regex patterns, etc.
+     *
+     * The response contains:
+     * - HTTP 400 (Bad Request)
+     * - a generic message ("Validation failed")
+     * - a structured map of fieldErrors grouped by field name
+     *
+     * Logging level: WARN, as validation failures are typically caused by client input.
+     *
+     * @param ex      the validation exception thrown by Spring
+     * @param request the current HTTP request
+     * @return a 400 ApiError response with detailed field validation errors
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        Map<String, List<String>> errors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(
+                        error -> error.getDefaultMessage() != null ?
+                                error.getDefaultMessage() : "Error validation",
+                        Collectors.toList()
+                        )
+                ));
+
+        ApiError apiError =new ApiError(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                "Validation failed",
+                request.getRequestURI(),
+                java.util.UUID.randomUUID().toString(),
+                errors
+        );
+        logger.warn("[{}] Validation error on {} : {}",
+                apiError.requestId(), apiError.path(), errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+
 }
