@@ -140,4 +140,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
+    /**
+     * Handles unknown endpoints (no matching route found).
+     *
+     * Triggered when a client calls an endpoint that does not exist.
+     * Returns a consistent 404 ApiError response.
+     *
+     * Logging level: INFO, since this can happen frequently (typos, outdated routes, bots, etc.).
+     *
+     * @param ex      the Spring NoHandlerFoundException
+     * @param request the current HTTP request
+     * @return a 404 ApiError response
+     */
+    @ExceptionHandler(NoHandlerFoundException .class)
+    public ResponseEntity<ApiError> handleNotFound(NoHandlerFoundException  ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ApiError apiError = new ApiError(
+            Instant.now(),
+            status.value(),
+            status.getReasonPhrase(),
+            "Endpoint not found",
+            request.getRequestURI(),
+            java.util.UUID.randomUUID().toString(),
+            null
+        );
+
+         logger.info("[{}] No endpoint {} {}",
+                 apiError.requestId(),
+                 ex.getHttpMethod(),
+                 ex.getRequestURL()
+         );
+
+         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    }
+
+
 }
