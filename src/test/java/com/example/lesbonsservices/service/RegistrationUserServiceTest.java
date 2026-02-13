@@ -2,6 +2,7 @@ package com.example.lesbonsservices.service;
 
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
+import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.User;
 import com.example.lesbonsservices.model.enums.RoleEnum;
 import com.example.lesbonsservices.repository.UserRepository;
@@ -13,11 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.web.bind.annotation.ResponseStatus;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class RegistrationUserServiceTest {
@@ -126,14 +125,13 @@ public class RegistrationUserServiceTest {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
         // ===== Act & Assert =====
-        ResponseStatusException thrown = assertThrows(ResponseStatusException.class, () -> {
+        EmailAlreadyUsedException thrown = assertThrows(EmailAlreadyUsedException.class, () -> {
             registrationUserService.registrationUser(userRequestDto);
         });
-        System.out.println(thrown.getMessage());
 
         // Vérification du message d'exception
-        assertEquals("Email existe déja", thrown.getReason());
-        assertEquals(HttpStatus.CONFLICT,thrown.getStatusCode());
+        assertEquals("Email: " + userRequestDto.getEmail()+" existe déja", thrown.getMessage());
+        assertTrue(thrown.getMessage().contains(userRequestDto.getEmail()));
 
         // Vérification des interactions avec le repository
         verify(userRepository).existsByEmail("john@gmail.com");
