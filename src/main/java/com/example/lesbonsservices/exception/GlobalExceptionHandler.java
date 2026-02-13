@@ -108,4 +108,36 @@ public class GlobalExceptionHandler {
     }
 
 
+    /**
+     * Handles business-level bad requests outside DTO validation.
+     *
+     * Used when the request is technically valid but violates functional rules
+     * (e.g. invalid state transition, inconsistent parameters, etc.).
+     *
+     * Logging level: WARN, since it is not a server bug.
+     *
+     * @param ex      the business exception
+     * @param request the current HTTP request
+     * @return a 400 ApiError response
+     */
+    @ExceptionHandler(BadRequestUsedException.class)
+    public ResponseEntity<ApiError>  handleBadRequestUsedException(BadRequestUsedException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                java.util.UUID.randomUUID().toString(),
+                null
+        );
+        logger.warn("[{}] Bad request on {} : {}",
+                apiError.requestId(), apiError.path(), ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
 }
