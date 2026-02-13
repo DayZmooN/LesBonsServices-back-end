@@ -2,19 +2,16 @@ package com.example.lesbonsservices.controller;
 
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
+import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.enums.RoleEnum;
 import com.example.lesbonsservices.service.RegistrationUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -119,21 +116,24 @@ public class RegistrationUserControllerTest {
         verify(registrationUserService,never()).registrationUser(any(UserRegistrationRequestDto.class));
     }
 
+
     /**
-     * Tests that the registration endpoint returns HTTP 409 (Conflict) when attempting to
-     * register a user with an email that already exists in the system.
+     * Verifies that the registration endpoint returns HTTP 409 (Conflict)
+     * when a user attempts to register with an email that already exists.
      *
-     * Test scenario:
-     * - Given a valid `UserRegistrationRequestDto` payload with an email that is already used.
-     * - When calling POST /api/auth/register.
-     * - Then the API should return HTTP 409 (Conflict) and the service method should throw
-     *   a `ResponseStatusException` with a conflict message ("Email existe déja").
+     * Test context:
+     * - A valid UserRegistrationRequestDto payload is sent with an existing email.
+     * - The service layer throws an EmailAlreadyUsedException.
      *
-     * Test assertions:
-     * - Verify that the HTTP status returned is 409 (Conflict).
-     * - Verify that the `registrationUserService.registrationUser` method is invoked.
+     * Expected behavior:
+     * - The API must respond with HTTP 409 (Conflict).
+     * - The controller must delegate the request to the registrationUser service method.
      *
-     * @throws Exception if there are errors during the test execution.
+     * Purpose:
+     * - Ensure that the GlobalExceptionHandler correctly maps the business exception
+     *   (EmailAlreadyUsedException) to a proper HTTP response.
+     *
+     * @throws Exception if an error occurs during MockMvc execution.
      */
     @Test
     void should_return_409_when_register_user_email_exist() throws Exception {
@@ -148,9 +148,8 @@ public class RegistrationUserControllerTest {
         );
 
         when(registrationUserService.registrationUser(any(UserRegistrationRequestDto.class)))
-                .thenThrow(new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "Email existe déja"
+                .thenThrow(new EmailAlreadyUsedException(
+                       request.getEmail()
                 ));
 
         // Perform HTTP POST request and verify response status
