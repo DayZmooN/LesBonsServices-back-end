@@ -4,11 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.Instant;
@@ -57,7 +59,7 @@ public class GlobalExceptionHandler {
         logger.warn("[{}] Email already used on {} : {}",
                 apiError.requestId(), apiError.path(), ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+        return ResponseEntity.status(status).body(apiError);
     }
 
 
@@ -87,7 +89,7 @@ public class GlobalExceptionHandler {
                         FieldError::getField,
                         Collectors.mapping(
                         error -> error.getDefaultMessage() != null ?
-                                error.getDefaultMessage() : "Error validation",
+                                error.getDefaultMessage() : "Validation error",
                         Collectors.toList()
                         )
                 ));
@@ -104,7 +106,7 @@ public class GlobalExceptionHandler {
         logger.warn("[{}] Validation error on {} : {}",
                 apiError.requestId(), apiError.path(), errors);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return ResponseEntity.status(status).body(apiError);
     }
 
 
@@ -137,7 +139,7 @@ public class GlobalExceptionHandler {
                 apiError.requestId(), apiError.path(), ex.getMessage()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+        return ResponseEntity.status(status).body(apiError);
     }
 
     /**
@@ -171,7 +173,44 @@ public class GlobalExceptionHandler {
                  ex.getRequestURL()
          );
 
-         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+         return ResponseEntity.status(status).body(apiError);
+    }
+
+
+    /**
+     * Handles {@link ResponseStatusException} and returns a standardized {@link ApiError} response.
+     *
+     * This handler ensures that exceptions carrying an HTTP status are properly mapped
+     * without being transformed into generic 500 errors by the global handler.
+     *
+     * @param ex      the ResponseStatusException containing status and reason
+     * @param request the current HTTP request
+     * @return a ResponseEntity containing the ApiError and the corresponding HTTP status
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatusCode statusCode = ex.getStatusCode();
+        String reasonPhrase = (statusCode instanceof HttpStatus hs)
+                ? hs.getReasonPhrase()
+                : "Error";
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                statusCode.value(),
+                reasonPhrase,
+                ex.getReason(),
+                request.getRequestURI(),
+                java.util.UUID.randomUUID().toString(),
+                null
+        );
+
+        logger.warn("[{}] {} on {} : {}",
+                apiError.requestId(), statusCode, apiError.path(), ex.getReason()
+        );
+
+        return ResponseEntity.status(statusCode).body(apiError);
     }
 
 
@@ -191,7 +230,6 @@ public class GlobalExceptionHandler {
      * @param request the current HTTP request
      * @return a standardized 500 ApiError response
      */
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest request){
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
