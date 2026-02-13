@@ -26,13 +26,16 @@ public class UserRegistrationRequestDto {
 
 
     @Column(name = "first_name", length = 100)
+    @NotBlank(message = "Prénom obligoire")
     private String firstName;
 
     @Column(name = "last_name", length = 100)
+    @NotBlank(message = "Nom obligatoire")
     private String lastName;
 
 
-    @NotEmpty(message = "Téléphone : uniquement des chiffres (15).")
+    @NotBlank(message = "Veuillez ecrire un numéro de telephone 10 chiffres")
+    @Pattern(regexp = "^0[67][0-9]{8}$", message = "Veuillez remplir numéro de téléphone valide")
     @Column(length = 30)
     private String phone;
 
