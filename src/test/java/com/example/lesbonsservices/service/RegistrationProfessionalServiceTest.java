@@ -3,10 +3,10 @@ package com.example.lesbonsservices.service;
 import com.example.lesbonsservices.dto.RegisterProfessionalRequestDto;
 import com.example.lesbonsservices.dto.RegisterProfessionalResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
+import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.Professional;
 import com.example.lesbonsservices.model.User;
 import com.example.lesbonsservices.model.enums.RoleEnum;
-import com.example.lesbonsservices.repository.ProfessionalRepository;
 import com.example.lesbonsservices.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +14,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -25,7 +28,7 @@ public class RegistrationProfessionalServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private ProfessionalRepository professionalRepository;
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private RegisterProfessionalService registerProfessionalService;
@@ -58,6 +61,10 @@ public class RegistrationProfessionalServiceTest {
         // verifie qui email pas encore en bdd
         when(userRepository.existsByEmail(userValid.getEmail())).thenReturn(false);
 
+        // Simulation de l'encodage du mot de passe
+        when(passwordEncoder.encode(anyString())).thenReturn("ENCODED_PASSWORD");
+
+        // Simulation de la sauvegarde en base
         when(userRepository.save(any(User.class))).thenReturn(userValid);
 
         // prepare la requete et la respones
@@ -76,7 +83,8 @@ public class RegistrationProfessionalServiceTest {
         requestDto.setCity(professional.getCity());
 
         RegisterProfessionalResponseDto responseDto = registerProfessionalService.register(requestDto);
-        //capture professional sauvegardé
+
+        //capture user professional sauvegardé
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
         verify(userRepository).save(userCaptor.capture());
@@ -90,6 +98,7 @@ public class RegistrationProfessionalServiceTest {
         assertThat(responseDto.getBusinessName()).isEqualTo("Formatech");
         assertThat(responseDto.getCity()).isEqualTo("Lyon");
         assertThat(responseDto.getUser().getEmail()).isEqualTo("john-pro@gmail.com");
+        assertThat(responseDto.getUser().getId()).isEqualTo(1L);
 
         //  comparer objet envoyer a la bdd (important)
         assertThat(userSaved).isNotNull();
@@ -97,11 +106,15 @@ public class RegistrationProfessionalServiceTest {
         assertThat(userSaved.getProfessional()).isNotNull();
         assertThat(userSaved.getRole()).isEqualTo(RoleEnum.PROFESSIONAL);
         assertThat(userSaved.getProfessional().getUser()).isEqualTo(userSaved);
+        assertThat(userSaved.getProfessional().getBusinessName()).isEqualTo("Formatech");
+        assertThat(userSaved.getPassword()).isEqualTo("ENCODED_PASSWORD");
+        assertThat(userSaved.getPassword()).isNotEqualTo("john12345");
+        assertThat(userSaved.getProfessional().getPhone()).isEqualTo("0706060606");
 
         //verify
         verify(userRepository).existsByEmail("john-pro@gmail.com");
         verify(userRepository, times(1)).save(any(User.class));
+        verify(passwordEncoder).encode("john12345");
     }
-
 
 }
