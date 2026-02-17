@@ -33,6 +33,28 @@ public class RegistrationProfessionalServiceTest {
     @InjectMocks
     private RegisterProfessionalService registerProfessionalService;
 
+    /**
+     * Tests the successful registration of a professional user.
+     *
+     * This test verifies the following:
+     * 1. The user, with the role of PROFESSIONAL, is correctly registered in the system.
+     * 2. The email provided is not already in use within the database.
+     * 3. The user details, along with professional information (e.g., business name, city),
+     *    are saved successfully in the database.
+     * 4. Password encoding takes place, ensuring the stored password is different
+     *    from the raw password provided during registration.
+     * 5. The response object contains accurate details of the registered professional,
+     *    including their ID, email, role, business name, and city.
+     * 6. All necessary interactions with repositories and services are correctly invoked.
+     *
+     * Assertions include:
+     * - Verifying the response object is not null and contains the expected data.
+     * - Verifying the user and professional objects captured for persistence
+     *   match the input and required transformations, such as password encoding.
+     * - Ensuring the `userRepository.existsByEmail`, `userRepository.save`,
+     *   and `passwordEncoder.encode` methods are executed as expected, with correct arguments.
+     * - Ensuring no duplicate email exists in the database before saving the user.
+     */
     @Test
     void should_register_professionel_successfully() {
         //Arrange
@@ -117,4 +139,42 @@ public class RegistrationProfessionalServiceTest {
         verify(passwordEncoder).encode("john12345");
     }
 
+    /**
+     * Tests the scenario where an exception is expected to be thrown when attempting
+     * to register a professional user with an email that already exists in the system.
+     *
+     * Ensures that:
+     * - The appropriate exception, {@link EmailAlreadyUsedException}, is thrown.
+     * - The exception message contains the email that caused the conflict.
+     * - The `userRepository.existsByEmail` method is called to check if the email already exists.
+     * - The `userRepository.save` method and `passwordEncoder.encode` method are not invoked,
+     *   indicating that the process was appropriately terminated upon email conflict detection.
+     */
+    @Test
+    void should_throw_exception_when_email_already_exists() {
+        //Arrange
+        UserRegistrationRequestDto userRequestDto = new UserRegistrationRequestDto();
+        userRequestDto.setEmail("john@gmail.com");
+        RegisterProfessionalRequestDto requestDto = new RegisterProfessionalRequestDto();
+        requestDto.setUser(userRequestDto);
+
+        //Act
+        when(userRepository.existsByEmail(userRequestDto.getEmail())).thenReturn(true);
+
+        //Assert
+        EmailAlreadyUsedException thrown = assertThrows(EmailAlreadyUsedException.class, () -> {
+            registerProfessionalService.register(requestDto);
+        });
+
+
+        assertEquals("Email: "+userRequestDto.getEmail()+" éxiste déja",thrown.getMessage());
+        assertTrue(thrown.getMessage().contains(userRequestDto.getEmail()));
+
+
+        //verify
+        verify(userRepository).existsByEmail("john@gmail.com");
+        verify(userRepository,never()).save(any());
+        verify(passwordEncoder,never()).encode(anyString());
+
+    }
 }

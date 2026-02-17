@@ -11,6 +11,12 @@ import com.example.lesbonsservices.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class responsible for managing the registration of professional users.
+ * It handles the creation of new users with a professional role, ensuring the
+ * uniqueness of email addresses and saving the user and associated professional details
+ * into the database.
+ */
 @Service
 public class RegisterProfessionalService {
     private final UserRepository userRepository;
@@ -27,7 +33,7 @@ public class RegisterProfessionalService {
         String email = newProUser.getUser().getEmail();
         //  verify if email already exists
         if(userRepository.existsByEmail(email)){
-            throw new EmailAlreadyUsedException("Email existe deja");
+            throw new EmailAlreadyUsedException("Email: "+ email +" éxiste déja");
         }
 
         //  create User
