@@ -4,6 +4,7 @@ import com.example.lesbonsservices.dto.RegisterProfessionalRequestDto;
 import com.example.lesbonsservices.dto.RegisterProfessionalResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
+import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.enums.RoleEnum;
 import com.example.lesbonsservices.service.RegisterProfessionalService;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ public class RegistrationProfessionalControllerTest {
         );
         RegisterProfessionalRequestDto requestProDto = new RegisterProfessionalRequestDto(
                 requestUser,
-                "john@gmail.com",
+                "formatech",
                 "",
                 "0710101010",
                 "lyon"
@@ -99,7 +100,7 @@ public class RegistrationProfessionalControllerTest {
         RegisterProfessionalResponseDto responseProDto = new RegisterProfessionalResponseDto(
                 1L,
                 responseUserDto,
-                "john@gmail.com",
+                "formatech",
                 "",
                 "0710101010",
                 "lyon"
@@ -110,7 +111,7 @@ public class RegistrationProfessionalControllerTest {
                 new RegisterProfessionalResponseDto(
                         1L,
                         responseUserDto,
-                        "john@gmail.com",
+                        "formatech",
                         "",
                         "0710101010",
                     "lyon"
@@ -177,5 +178,63 @@ public class RegistrationProfessionalControllerTest {
         verify(registerProfessionalService, never()).register(any(RegisterProfessionalRequestDto.class));
 
     }
+
+    /**
+     * Test method to validate that attempting to register a professional user with an already existing email
+     * results in an HTTP 409 Conflict response.
+     *
+     * This test ensures:
+     * - The registration endpoint rejects the request when the provided email is already registered.
+     * - The service layer correctly throws {@link EmailAlreadyUsedException}.
+     * - The HTTP response contains the expected status code and error details.
+     *
+     * Test steps include:
+     * 1. Creating a {@link UserRegistrationRequestDto} object with user details including the existing email.
+     * 2. Wrapping the user details in a {@link RegisterProfessionalRequestDto} object for the professional registration.
+     * 3. Mocking the service layer to throw an {@link EmailAlreadyUsedException} when the register method is invoked.
+     * 4. Performing an HTTP POST request to the endpoint `/api/auth/pro/register` with the JSON payload.
+     * 5. Verifying that:
+     *    - The HTTP response status is 409 (Conflict).
+     *    - The JSON response payload contains a valid error message.
+     * 6. Confirming that the service method {@code register(RegisterProfessionalRequestDto)} is invoked.
+     *
+     * @throws Exception if there is any error during the test execution.
+     */
+    @Test
+    void should_return_409_when_register_professional_email_exist() throws Exception  {
+
+        UserRegistrationRequestDto requestUser = new UserRegistrationRequestDto(
+                "john@gmail.com",
+                "john12345",
+                "john",
+                "doe",
+                "0606060606",
+                RoleEnum.PROFESSIONAL
+        );
+
+        RegisterProfessionalRequestDto requestProDto = new RegisterProfessionalRequestDto(
+                requestUser,
+                "formatech",
+                "",
+                "0710101010",
+                "lyon"
+        );
+
+        when(registerProfessionalService.register(any(RegisterProfessionalRequestDto.class)))
+                .thenThrow(new EmailAlreadyUsedException(requestUser.getEmail()));
+
+        mockMvc.perform(post("/api/auth/pro/register")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .content(objectMapper.writeValueAsString(requestProDto)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.path").value("/api/auth/pro/register"))
+                .andExpect(jsonPath("$.message").exists());
+
+
+        verify(registerProfessionalService).register(any(RegisterProfessionalRequestDto.class));
+    }
+
 
 }
