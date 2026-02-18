@@ -28,6 +28,19 @@ public class RegisterProfessionalService {
 
     }
 
+    /**
+     * Registers a new professional user in the system. It verifies the uniqueness of
+     * the provided email, creates the user and associated professional entity,
+     * and persists the information in the database. If the email already exists,
+     * an exception is thrown.
+     *
+     * @param newProUser the data transfer object containing the details of the user
+     *                   and professional to be registered, including email, password,
+     *                   personal information, and business details.
+     * @return a data transfer object containing the registered professional's ID,
+     *         user information, business name, description, phone number, and city.
+     * @throws EmailAlreadyUsedException if the provided email is already in use.
+     */
     public RegisterProfessionalResponseDto register(RegisterProfessionalRequestDto newProUser) {
 
         String email = newProUser.getUser().getEmail();

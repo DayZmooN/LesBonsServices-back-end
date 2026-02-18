@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RegisterProfessionalRequestDto {
 
-    @NotNull
+    @NotNull(message = "user is required")
     @Valid
     private UserRegistrationRequestDto user;
 

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -17,9 +18,19 @@ import tools.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * This test class verifies the functionality of the RegisterProfessionalController
+ * by testing its professional user registration endpoint.
+ *
+ * The tests cover scenarios for:
+ * - Successful registration with valid input.
+ * - Failure with invalid input resulting in proper error handling.
+ *
+ * The tests use MockMvc to simulate HTTP requests and validate API responses, ensuring
+ * the controller interacts correctly with the RegisterProfessionalService layer.
+ */
 @WebMvcTest(controllers = RegisterProfessionalController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class RegistrationProfessionalControllerTest {
@@ -60,7 +71,7 @@ public class RegistrationProfessionalControllerTest {
     @Test
     void should_return_201_when_register_professional_with_valid_payload() throws Exception  {
 
-        UserRegistrationRequestDto requestProUser = new UserRegistrationRequestDto(
+        UserRegistrationRequestDto requestUser = new UserRegistrationRequestDto(
                 "john@gmail.com",
                 "john12345",
                 "john",
@@ -68,8 +79,8 @@ public class RegistrationProfessionalControllerTest {
                 "0606060606",
                 RoleEnum.PROFESSIONAL
         );
-        RegisterProfessionalRequestDto resquestDto = new RegisterProfessionalRequestDto(
-                requestProUser,
+        RegisterProfessionalRequestDto requestProDto = new RegisterProfessionalRequestDto(
+                requestUser,
                 "john@gmail.com",
                 "",
                 "0710101010",
@@ -108,13 +119,63 @@ public class RegistrationProfessionalControllerTest {
 
         this.mockMvc.perform(post("/api/auth/pro/register")
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(resquestDto)))
+                        .content(objectMapper.writeValueAsString(requestProDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(content().json(objectMapper.writeValueAsString(responseProDto)));
 
 
         verify(registerProfessionalService).register(any(RegisterProfessionalRequestDto.class));
+    }
+
+    /**
+     * Test method to ensure the registration of a professional user fails with a 400 Bad Request
+     * status when an invalid payload is provided.
+     *
+     * This test verifies:
+     * - The registration endpoint returns an HTTP 400 status.
+     * - The service layer method {@code register(RegisterProfessionalRequestDto)} is never invoked.
+     *
+     * The method prepares an invalid {@link RegisterProfessionalRequestDto} object with:
+     * - A null user field.
+     * - A valid email.
+     * - An empty business name (violating the @NotBlank validation).
+     * - A valid phone number.
+     * - A valid city.
+     *
+     * A POST request is performed to the endpoint `/api/auth/pro/register`,
+     * sending the invalid payload as JSON. The response is asserted to ensure the 400 status,
+     * indicating the input validation failed as expected.
+     *
+     * @throws Exception if there is any error during the test execution.
+     */
+    @Test
+    void should_return_400_when_register_professional_with_invalid_payload() throws Exception  {
+
+        //arrange
+        RegisterProfessionalRequestDto requestProDto = new RegisterProfessionalRequestDto(
+                null,
+                "",
+                "",
+                "0710101010",
+                "lyon"
+        );
+
+        mockMvc.perform(post("/api/auth/pro/register")
+                        .contentType("application/json")
+                        .characterEncoding("UTF-8")
+                        .content(objectMapper.writeValueAsString(requestProDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.fieldErrors.user[0]").value("user is required"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.fieldErrors.businessName[0]").value("Le nom de l'entreprise est obligatoire"));
+        ;
+
+
+        verify(registerProfessionalService, never()).register(any(RegisterProfessionalRequestDto.class));
+
     }
 
 }
