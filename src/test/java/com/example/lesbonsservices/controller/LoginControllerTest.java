@@ -48,7 +48,8 @@ class LoginControllerTest {
         LoginResponseDto response = new LoginResponseDto(
                 1L,
                 "test@example.com",
-                RoleEnum.CLIENT
+                RoleEnum.CLIENT,
+                "12"
         );
           //simulation de controller qu'on appelle le service
         when(loginService.authenticate(any(LoginRequestDto.class)))

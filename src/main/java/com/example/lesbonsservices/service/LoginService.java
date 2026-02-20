@@ -1,5 +1,6 @@
 package com.example.lesbonsservices.service;
 
+import com.example.lesbonsservices.configuration.JwtUtils;
 import com.example.lesbonsservices.dto.LoginRequestDto;
 import com.example.lesbonsservices.dto.LoginResponseDto;
 import com.example.lesbonsservices.model.User;
@@ -14,10 +15,13 @@ public class LoginService {
  private final UserRepository userRepository;
  private final PasswordEncoder passwordEncoder;
 
+ private final JwtUtils jwtUtils;
+
  //Injection des dépendances via constructeur
-   public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder ){
+   public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils ){
      this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
+    this.jwtUtils = jwtUtils;
    }
 
     /**
@@ -29,6 +33,9 @@ public class LoginService {
 
         //chercher l'utilisateur par emil
         User user = userRepository.findByEmail(dto.getEmail());
+
+        String token = jwtUtils.generateToken(user.getId());
+
 
         //Email introuvable
         if (user == null) {
@@ -47,6 +54,7 @@ public class LoginService {
         loginResponseDto.setUserId(user.getId());
         loginResponseDto.setEmail(user.getEmail());
         loginResponseDto.setRole(user.getRole());
+        loginResponseDto.setToken(token);
 
         return loginResponseDto;
  }

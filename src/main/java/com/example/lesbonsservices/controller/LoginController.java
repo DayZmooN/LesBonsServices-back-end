@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class LoginController {
 
     private final LoginService loginService;
@@ -36,4 +36,5 @@ public class LoginController {
         //Si non -->401
         return ResponseEntity.status(401).body("Identifiants invalides");
     }
+
 }

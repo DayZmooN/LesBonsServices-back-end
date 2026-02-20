@@ -19,5 +19,6 @@ public class LoginResponseDto {
     private Long userId;
     private String email;
     private RoleEnum role;
+    private String token;
 
 }
