@@ -1,14 +1,18 @@
 package com.example.lesbonsservices.controller;
 
+import com.example.lesbonsservices.configuration.JwtUtils;
+import com.example.lesbonsservices.configuration.SecurityConfig;
 import com.example.lesbonsservices.dto.LoginRequestDto;
 import com.example.lesbonsservices.dto.LoginResponseDto;
 import com.example.lesbonsservices.model.enums.RoleEnum;
+import com.example.lesbonsservices.service.CustomUserDetailsService;
 import com.example.lesbonsservices.service.LoginService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,17 +28,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(LoginController.class)
-@AutoConfigureMockMvc(addFilters = false)//désactive les filtres de sprin securitu pour eviter les 403
+@AutoConfigureMockMvc(addFilters = false)
+@Import(SecurityConfig.class)
 class LoginControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
     @MockitoBean
     private LoginService loginService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     @DisplayName("POST /api/login - succès")
@@ -59,7 +70,7 @@ class LoginControllerTest {
         //on simule un appel HTTP POST vers /api/logiin
 
         mockMvc.perform(
-                post("/api/login")
+                post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)// le body est du JSON
                         .content(objectMapper.writeValueAsString(request))//convertir DTO en JSON
         )
@@ -68,7 +79,5 @@ class LoginControllerTest {
 
         // VERIFY : vérifier que  controller a bien applé le service une fois
         verify(loginService).authenticate(any(LoginRequestDto.class));
-
-
     }
 }

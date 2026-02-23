@@ -1,14 +1,18 @@
 package com.example.lesbonsservices.controller;
 
+import com.example.lesbonsservices.configuration.JwtUtils;
+import com.example.lesbonsservices.configuration.SecurityConfig;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.enums.RoleEnum;
+import com.example.lesbonsservices.service.CustomUserDetailsService;
 import com.example.lesbonsservices.service.RegistrationUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -28,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Business logic is mocked and tested separately in service unit tests.
  */
 @WebMvcTest(RegistrationUserController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc()
+@Import(SecurityConfig.class)
 public class RegistrationUserControllerTest {
 
     /**
@@ -37,14 +42,23 @@ public class RegistrationUserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+
     /**
      * Mocked service layer.
      * The real RegistrationUserService is NOT loaded in this test.
      */
     @MockitoBean
     private RegistrationUserService  registrationUserService;
-    @Autowired
-    private ObjectMapper objectMapper;
+
 
     /**
      * Test case: successful user registration.

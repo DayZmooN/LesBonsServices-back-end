@@ -1,16 +1,20 @@
 package com.example.lesbonsservices.controller;
 
+import com.example.lesbonsservices.configuration.JwtUtils;
+import com.example.lesbonsservices.configuration.SecurityConfig;
 import com.example.lesbonsservices.dto.RegisterProfessionalRequestDto;
 import com.example.lesbonsservices.dto.RegisterProfessionalResponseDto;
 import com.example.lesbonsservices.dto.UserRegistrationRequestDto;
 import com.example.lesbonsservices.dto.UserRegistrationResponseDto;
 import com.example.lesbonsservices.exception.EmailAlreadyUsedException;
 import com.example.lesbonsservices.model.enums.RoleEnum;
+import com.example.lesbonsservices.service.CustomUserDetailsService;
 import com.example.lesbonsservices.service.RegisterProfessionalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,17 +37,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * the controller interacts correctly with the RegisterProfessionalService layer.
  */
 @WebMvcTest(controllers = RegisterProfessionalController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc()
+@Import(SecurityConfig.class)
 public class RegistrationProfessionalControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private RegisterProfessionalService registerProfessionalService;
-
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private RegisterProfessionalService registerProfessionalService;
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     /**
      * Test method to validate successful registration of a professional user.
