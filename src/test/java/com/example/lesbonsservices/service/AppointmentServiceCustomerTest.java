@@ -19,6 +19,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit test class for testing the functionality of {@link ListAppointmentCustomerService}.
+ *
+ * This test class focuses on verifying the behavior of retrieving appointments
+ * associated with a specific customer. Mock dependencies and test data are utilized
+ * to ensure service correctness and proper interactions with the {@link UserRepository}.
+ */
 @ExtendWith(MockitoExtension.class)
 public class AppointmentServiceCustomerTest {
 
@@ -30,24 +37,10 @@ public class AppointmentServiceCustomerTest {
 
 
     /**
-     * Tests the method responsible for listing all appointments for a user.
-     *
-     * This test case performs the following actions:
-     * 1. Sets up the required objects, including an Appointment, User, Professional,
-     *    and Service, and links them appropriately.
-     * 2. Mocks the user repository to simulate finding a user by their ID.
-     * 3. Calls the service method to list all appointments for the specified user.
-     * 4. Validates the results by ensuring that the data retrieved matches the setup data.
-     * 5. Confirms expected interactions with the mocked repository, ensuring no unintended interactions occur.
-     *
-     * The test verifies:
-     * - Non-null response from the service method.
-     * - The list of appointment DTOs contains the correct number of entries.
-     * - DTO fields match the expected data from the setup.
-     * - Appropriate interactions with the mocked dependencies.
+     * Should return an list of appointment when the customer has appointments.
      */
     @Test
-    void shouldListAllAppointmentsForUser(){
+    void shouldListAllAppointmentsForCustomer(){
 
         //Arrange
         //appointment
@@ -96,6 +89,30 @@ public class AppointmentServiceCustomerTest {
 
         assertNotEquals(proUser.getId(),appointmentResponseDto.getProfessionalId());
 
+
+        verify(userRepository).findById(1L);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    /**
+     * Should return an empty list when the customer has no appointments.
+     */
+    @Test
+    void shouldReturnEmptyListWhenCustomerHasNoAppointment(){
+        //  Arrange
+        // customer == currentUser connected
+        User customer = new User();
+        customer.setId(1L);
+        customer.setAppointment(List.of());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
+
+        //  Act
+        List<AppointmentResponseDto> responses = listAppointmentCustomerService.listAppointmentCustomer(customer.getId());
+
+        //  Assert
+        assertNotNull(responses);
+        assertTrue(responses.isEmpty());
 
         verify(userRepository).findById(1L);
         verifyNoMoreInteractions(userRepository);
