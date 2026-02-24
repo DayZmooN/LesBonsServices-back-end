@@ -7,5 +7,6 @@ public enum StatusEnum {
     EN_COURS,
     ANNULE,
     ABSENT,
-    DISPONIBLE
+    DISPONIBLE,
+    INDISPONIBLE
 }
