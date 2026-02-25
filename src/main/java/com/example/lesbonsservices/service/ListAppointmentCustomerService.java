@@ -39,18 +39,56 @@ public class ListAppointmentCustomerService {
             return List.of();
         }
 
-        return customer.getAppointment().stream()
-                .map(appointment ->  new AppointmentResponseDto(
-                        appointment.getId(),
-                        appointment.getStatus(),
-                        appointment.getComment(),
-                        appointment.getStartDateTime(),
-                        appointment.getEndDateTime(),
-                        appointment.getCreated(),
-                        appointment.getUpdated(),
-                        appointment.getProfessional().getId(),
-                        appointment.getCustomer().getId(),
-                        appointment.getService().getId()
-                        )).toList();
+
+
+
+        return customer.getAppointment()
+                .stream()
+                .map(appointment -> {
+
+                    AppointmentResponseDto dto = new AppointmentResponseDto();
+                    // Customer
+                    dto.setCustomerId(appointment.getCustomer().getId());
+                    dto.setCustomerFirstName(appointment.getCustomer().getFirstName());
+                    dto.setCustomerLastName(appointment.getCustomer().getLastName());
+
+                    //  Appontment info
+                    dto.setId(appointment.getId());
+                    dto.setStatus(appointment.getStatus());
+                    dto.setComment(appointment.getComment());
+                    dto.setStartDateTime(appointment.getStartDateTime());
+                    dto.setEndDateTime(appointment.getEndDateTime());
+                    dto.setCreatedAt(appointment.getCreated());
+                    dto.setUpdatedAt(appointment.getUpdated());
+
+
+                    // Professional
+                    dto.setProfessionalId(appointment.getProfessional().getId());
+                    dto.setBusinessName(appointment.getProfessional().getBusinessName()); // ← manquait ?
+                    dto.setDescription(appointment.getProfessional().getDescription());   // ← manquait ?
+                    dto.setProfessionalPhone(appointment.getProfessional().getPhone());
+                    dto.setProfessionalCity(appointment.getProfessional().getCity());
+                    dto.setProfessionalAddress(appointment.getProfessional().getAddress());
+
+                    // Service
+                    dto.setServiceId(appointment.getService().getId());
+                    dto.setServiceName(appointment.getService().getName());
+
+                    return dto;
+                }).toList();
+
+//        return customer.getAppointment().stream()
+//                .map(appointment ->  new AppointmentResponseDto(
+//                        appointment.getId(),
+//                        appointment.getStatus(),
+//                        appointment.getComment(),
+//                        appointment.getStartDateTime(),
+//                        appointment.getEndDateTime(),
+//                        appointment.getCreated(),
+//                        appointment.getUpdated(),
+//                        appointment.getProfessional().getId(),
+//                        appointment.getCustomer().getId(),
+//                        appointment.getService().getId()
+//                        )).toList();
     }
 }

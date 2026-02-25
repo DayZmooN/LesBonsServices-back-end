@@ -77,32 +77,53 @@ public class ListAppointmentCustomerControllerTest {
     @WithMockUser(username = "1", roles = {"CLIENT"})
     void should_return_200_and_list_when_authenticated_customer() throws Exception {
         //  Arrange
-        AppointmentResponseDto dto = new AppointmentResponseDto(
-                10L,
-                StatusEnum.EN_COURS,
-                "ok",
-                LocalDateTime.of(2026, 2, 25, 10, 0),
-                LocalDateTime.of(2026, 2, 25, 10, 30),
-                LocalDateTime.of(2026, 2, 25, 9, 0),
-                LocalDateTime.of(2026, 2, 25, 9, 0),
-                100L,
-                1L,
-                3L
-                );
+        AppointmentResponseDto dto = new AppointmentResponseDto();
+        dto.setId(10L);
+        dto.setStatus(StatusEnum.EN_COURS);
+        dto.setComment("ok");
+        dto.setStartDateTime(LocalDateTime.of(2026, 2, 25, 10, 0));
+        dto.setEndDateTime(LocalDateTime.of(2026, 2, 25, 10, 30));
+        dto.setCreatedAt(LocalDateTime.of(2026, 2, 25, 9, 0));
+        dto.setUpdatedAt(LocalDateTime.of(2026, 2, 25, 9, 0));
+        dto.setProfessionalId(100L);
+        dto.setBusinessName("MonBusiness");
+        dto.setProfessionalAddress("12 rue de la Paix");
+        dto.setDescription("Description pro");
+        dto.setProfessionalPhone("0601020304");
+        dto.setProfessionalCity("Paris");
+        dto.setCustomerId(1L);
+        dto.setCustomerFirstName("Jean");
+        dto.setCustomerLastName("Dupont");
+        // a rempli côté pro
+        dto.setCustomerAddress(null);
+        dto.setServiceId(3L);
+        dto.setServiceName("Massage");
         when(listAppointmentCustomerService.listAppointmentCustomer(1L)).thenReturn(List.of(dto));
 
 
         //  Act Assert
         mockMvc.perform(get("/api/me/appointments/customer/list")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(10))
                 .andExpect(jsonPath("$[0].status").value("EN_COURS"))
-                .andExpect(jsonPath("$[0].customerId").value(1))
+                .andExpect(jsonPath("$[0].comment").value("ok"))
+                .andExpect(jsonPath("$[0].startDateTime").value("2026-02-25T10:00:00"))
+                .andExpect(jsonPath("$[0].endDateTime").value("2026-02-25T10:30:00"))
                 .andExpect(jsonPath("$[0].professionalId").value(100))
-                .andExpect(jsonPath("$[0].serviceId").value(3));
+                .andExpect(jsonPath("$[0].businessName").value("MonBusiness"))
+                .andExpect(jsonPath("$[0].professionalAddress").value("12 rue de la Paix"))
+                .andExpect(jsonPath("$[0].description").value("Description pro"))
+                .andExpect(jsonPath("$[0].professionalPhone").value("0601020304"))
+                .andExpect(jsonPath("$[0].professionalCity").value("Paris"))
+                .andExpect(jsonPath("$[0].customerId").value(1))
+                .andExpect(jsonPath("$[0].customerFirstName").value("Jean"))
+                .andExpect(jsonPath("$[0].customerLastName").value("Dupont"))
+                .andExpect(jsonPath("$[0].customerAddress").doesNotExist())
+                .andExpect(jsonPath("$[0].serviceId").value(3))
+                .andExpect(jsonPath("$[0].serviceName").value("Massage"));
 
         verify(listAppointmentCustomerService).listAppointmentCustomer(1L);
         verifyNoMoreInteractions(listAppointmentCustomerService);

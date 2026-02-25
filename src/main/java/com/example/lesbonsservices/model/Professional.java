@@ -33,6 +33,8 @@ public class Professional {
             cascade = CascadeType.ALL, optional = true)
     private Planning planning;
 
+    @Column(name = "address")
+    private String address;
 
     @JsonIgnore
     @OneToMany(mappedBy = "professional", fetch = FetchType.LAZY,

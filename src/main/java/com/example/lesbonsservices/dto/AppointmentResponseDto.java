@@ -23,6 +23,17 @@ public class AppointmentResponseDto {
     private LocalDateTime updatedAt;
 
     private Long professionalId;
+    private String businessName;
+    private String professionalAddress;
+    private String description;
+    private String professionalPhone;
+    private String professionalCity;
+
     private Long customerId;
+    private String customerFirstName;
+    private String customerLastName;
+    private String customerAddress;
+
     private Long serviceId;
+    private String serviceName;
 }

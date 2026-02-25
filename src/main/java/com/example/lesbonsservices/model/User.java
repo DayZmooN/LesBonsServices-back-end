@@ -35,6 +35,8 @@ public class User {
     @Column(name = "last_name", length = 100)
     private String lastName;
 
+    @Column(name = "address")
+    private String address;
 
     @NotBlank
     @Pattern(regexp = "^\\d{10,15}$", message = "Téléphone : uniquement des chiffres (10 à 15).")
