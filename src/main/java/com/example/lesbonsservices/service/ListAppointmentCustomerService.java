@@ -76,19 +76,5 @@ public class ListAppointmentCustomerService {
 
                     return dto;
                 }).toList();
-
-//        return customer.getAppointment().stream()
-//                .map(appointment ->  new AppointmentResponseDto(
-//                        appointment.getId(),
-//                        appointment.getStatus(),
-//                        appointment.getComment(),
-//                        appointment.getStartDateTime(),
-//                        appointment.getEndDateTime(),
-//                        appointment.getCreated(),
-//                        appointment.getUpdated(),
-//                        appointment.getProfessional().getId(),
-//                        appointment.getCustomer().getId(),
-//                        appointment.getService().getId()
-//                        )).toList();
     }
 }
