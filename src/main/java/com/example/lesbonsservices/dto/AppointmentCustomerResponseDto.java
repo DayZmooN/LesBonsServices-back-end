@@ -12,28 +12,27 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppointmentResponseDto {
+public class AppointmentCustomerResponseDto {
 
     private Long id;
     private StatusEnum status;
-    private String comment;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
+
+    // customer a changer avec response ProfessionalResponseDto
     private Long professionalId;
     private String businessName;
     private String professionalAddress;
-    private String description;
     private String professionalPhone;
     private String professionalCity;
 
+    // customer a changer avec response CustomerResponseDto
     private Long customerId;
     private String customerFirstName;
     private String customerLastName;
-    private String customerAddress;
 
+    // customer a changer avec response ServiceResponseDto
     private Long serviceId;
     private String serviceName;
 }
