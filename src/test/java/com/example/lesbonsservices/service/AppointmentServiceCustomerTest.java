@@ -1,6 +1,6 @@
 package com.example.lesbonsservices.service;
 
-import com.example.lesbonsservices.dto.AppointmentResponseDto;
+import com.example.lesbonsservices.dto.AppointmentCustomerResponseDto;
 import com.example.lesbonsservices.model.Appointment;
 import com.example.lesbonsservices.model.Professional;
 import com.example.lesbonsservices.model.Service;
@@ -13,18 +13,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+
 /**
- * Unit test class for testing the functionality of {@link ListAppointmentCustomerService}.
- *
- * This test class focuses on verifying the behavior of retrieving appointments
- * associated with a specific customer. Mock dependencies and test data are utilized
- * to ensure service correctness and proper interactions with the {@link UserRepository}.
+ * Test class for verifying the functionality of listing appointments for customers
+ * in the AppointmentService module.
+ * Utilizes the Mockito framework for mocking dependencies and JUnit 5 for test execution.
  */
 @ExtendWith(MockitoExtension.class)
 public class AppointmentServiceCustomerTest {
@@ -33,7 +33,7 @@ public class AppointmentServiceCustomerTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private ListAppointmentCustomerService listAppointmentCustomerService;
+    private ListAppointmentService listAppointmentService;
 
 
     /**
@@ -42,11 +42,16 @@ public class AppointmentServiceCustomerTest {
     @Test
     void shouldListAllAppointmentsForCustomer(){
 
+        LocalDateTime startDateTime = LocalDateTime.of(2026, 2, 5, 10, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2026, 2, 5, 11, 0);
+
         //Arrange
         //appointment
         Appointment appointment = new Appointment();
         appointment.setId(1L);
         appointment.setStatus(StatusEnum.EN_COURS);
+        appointment.setStartDateTime(startDateTime);
+        appointment.setEndDateTime(endDateTime);
 
         // pro user
         User proUser = new User();
@@ -56,39 +61,61 @@ public class AppointmentServiceCustomerTest {
         Professional professional = new Professional();
         professional.setId(100L);
         professional.setUser(proUser);
+        professional.setBusinessName("Formatech");
+        professional.setCity("Lyon");
+        professional.setPhone("0606060606");
+        professional.setAddress("1 rue du maréchale petin");
         appointment.setProfessional(professional);
 
         // Service
         Service service = new Service();
         service.setId(3L);
+        service.setName("création d'un site web");
         appointment.setService(service);
 
         //  customer = current user
         User customer = new User();
         customer.setId(1L);
+        customer.setFirstName("john");
+        customer.setLastName("doe");
         appointment.setCustomer(customer);
-        customer.setAppointment(List.of(appointment));
 
+
+        customer.setAppointment(List.of(appointment));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
 
         // Act
-        List<AppointmentResponseDto> responseDto = listAppointmentCustomerService.listAppointmentCustomer(customer.getId());
+        List<AppointmentCustomerResponseDto> responseDto = listAppointmentService.listAppointmentCustomer(customer.getId());
 
         //Assert
         assertNotNull(responseDto);
         assertEquals(1,responseDto.size());
 
-        AppointmentResponseDto appointmentResponseDto = responseDto.get(0);
+        AppointmentCustomerResponseDto appointmentCustomerResponseDto = responseDto.get(0);
 
-        assertEquals(1L,appointmentResponseDto.getId());
-        assertEquals(StatusEnum.EN_COURS, appointmentResponseDto.getStatus());
-        assertEquals(100L,appointmentResponseDto.getProfessionalId());
-        assertEquals(1L,appointmentResponseDto.getCustomerId());
-        assertEquals(3L,appointmentResponseDto.getServiceId());
+        assertEquals(1L, appointmentCustomerResponseDto.getId());
+        assertEquals(StatusEnum.EN_COURS, appointmentCustomerResponseDto.getStatus());
+        assertEquals(startDateTime, appointmentCustomerResponseDto.getStartDateTime());
+        assertEquals(endDateTime, appointmentCustomerResponseDto.getEndDateTime());
 
-        assertNotEquals(proUser.getId(),appointmentResponseDto.getProfessionalId());
+        //  Professional
+        assertEquals(100L, appointmentCustomerResponseDto.getProfessionalId());
+        assertEquals("Formatech",appointmentCustomerResponseDto.getBusinessName());
+        assertEquals("Lyon",appointmentCustomerResponseDto.getProfessionalCity());
+        assertEquals("1 rue du maréchale petin",appointmentCustomerResponseDto.getProfessionalAddress());
+        assertEquals("0606060606",appointmentCustomerResponseDto.getProfessionalPhone());
 
+        //  Customer
+        assertEquals(1L, appointmentCustomerResponseDto.getCustomerId());
+        assertEquals("john",appointmentCustomerResponseDto.getCustomerFirstName());
+        assertEquals("doe",appointmentCustomerResponseDto.getCustomerLastName());
+
+        //  Service
+        assertEquals(3L, appointmentCustomerResponseDto.getServiceId());
+        assertEquals("création d'un site web", appointmentCustomerResponseDto.getServiceName());
+
+        assertNotEquals(proUser.getId(), appointmentCustomerResponseDto.getProfessionalId());
 
         verify(userRepository).findById(1L);
         verifyNoMoreInteractions(userRepository);
@@ -108,7 +135,7 @@ public class AppointmentServiceCustomerTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(customer));
 
         //  Act
-        List<AppointmentResponseDto> responses = listAppointmentCustomerService.listAppointmentCustomer(customer.getId());
+        List<AppointmentCustomerResponseDto> responses = listAppointmentService.listAppointmentCustomer(customer.getId());
 
         //  Assert
         assertNotNull(responses);
