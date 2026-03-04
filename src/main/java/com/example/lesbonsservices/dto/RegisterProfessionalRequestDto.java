@@ -28,7 +28,7 @@ public class RegisterProfessionalRequestDto {
     private String description;
 
     @NotBlank(message = "Veuillez ecrire un numéro de telephone 10 chiffres")
-    @Pattern(regexp = "^0[67][0-9]{8}$", message = "Veuillez remplir numéro de téléphone valide")
+    @Pattern(regexp = "^0[14679][0-9]{8}$", message = "Veuillez remplir numéro de téléphone valide")
     @Column(length = 30)
     private String phone;
 
