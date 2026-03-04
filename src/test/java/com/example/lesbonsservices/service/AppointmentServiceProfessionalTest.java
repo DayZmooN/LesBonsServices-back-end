@@ -18,8 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -136,5 +135,31 @@ public class AppointmentServiceProfessionalTest {
         verifyNoMoreInteractions(userRepository);
     }
 
+    /**
+     * Should return an empty list of appointments for a professional user
+     */
+    @Test
+    void should_return_empty_list_when_professional_has_no_appointment(){
 
+        //  Arrange
+        User userPro = new User();
+        userPro.setId(1L);
+
+        Professional professional = new Professional();
+        professional.setId(1L);
+        professional.setUser(userPro);
+        userPro.setProfessional(professional);
+        professional.setAppointments(List.of());
+
+        //  Act
+        when(userRepository.findById(userPro.getId())).thenReturn(Optional.of(userPro));
+        List<AppointmentProResponseDto> proResponseDto = listAppointmentService.getAppointmentForPro(userPro.getId());
+
+        //Assert
+        assertNotNull(proResponseDto);
+        assertTrue(proResponseDto.isEmpty());
+
+        verify(userRepository).findById(1L);
+        verifyNoMoreInteractions(userRepository);
+    }
 }
